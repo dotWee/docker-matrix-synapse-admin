@@ -1,0 +1,68 @@
+name: build and publish docker image
+
+on:
+  push:
+    branches:
+      - "master"
+    tags:
+      - "v*.*.*"
+  pull_request:
+    branches:
+      - "master"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: prepare
+        id: prep
+        run: |
+          IMAGE="${GITHUB_REPOSITORY,,}"
+          if [[ "$GITHUB_REF" == refs/heads/master ]]
+          then
+            TAGS="$IMAGE:master"
+          elif [[ "$GITHUB_REF" == refs/tags/* ]]
+          then
+            VERSION="${GITHUB_REF#refs/tags/}"
+            TAGS="$IMAGE:$VERSION"
+          else
+            TAGS="$IMAGE:continuous"
+          fi
+          echo "📚 building ref: $GITHUB_REF"
+          echo "🏷 image tags: $TAGS"
+          echo ::set-output name=tags::${TAGS}
+          
+      - name: checkout code
+        uses: actions/checkout@v2
+
+      - name: set up qemu
+        uses: docker/setup-qemu-action@v1
+
+      - name: set up buildx
+        uses: docker/setup-buildx-action@v1
+          
+      - name: login to docker hub
+        uses: docker/login-action@v1 
+        with:
+          username: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
+          password: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
+          
+      #- name: login to github container registry
+      #  if: secrets.GH_REGISTRY_USERNAME
+      #  uses: docker/login-action@v1 
+      #  with:
+      #    registry: ghcr.io
+      #    username: ${{ secrets.GH_REGISTRY_USERNAME }}
+      #    password: ${{ secrets.GH_REGISTRY_TOKEN }}
+          
+      - name: build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+          push: true
+          cache-from: type=registry,ref=${{ steps.prep.outputs.tags }}
+          cache-to: type=inline
+          tags: docker.io/${{ steps.prep.outputs.tags }}
+          #     ghcr.io/${{ steps.prep.outputs.tags }}
