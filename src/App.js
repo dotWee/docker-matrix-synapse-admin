@@ -8,6 +8,8 @@ import { RoomList, RoomShow } from "./components/rooms";
 import { ReportList, ReportShow } from "./components/EventReports";
 import LoginPage from "./components/LoginPage";
 import UserIcon from "@material-ui/icons/Group";
+import EqualizerIcon from "@material-ui/icons/Equalizer";
+import { UserMediaStatsList } from "./components/statistics";
 import RoomIcon from "@material-ui/icons/ViewList";
 import ReportIcon from "@material-ui/icons/Warning";
 import { ImportFeature } from "./components/ImportFeature";
@@ -27,6 +29,7 @@ const i18nProvider = polyglotI18nProvider(
 
 const App = () => (
   <Admin
+    disableTelemetry
     loginPage={LoginPage}
     authProvider={authProvider}
     dataProvider={dataProvider}
@@ -44,6 +47,11 @@ const App = () => (
     />
     <Resource name="rooms" list={RoomList} show={RoomShow} icon={RoomIcon} />
     <Resource
+      name="user_media_statistics"
+      list={UserMediaStatsList}
+      icon={EqualizerIcon}
+    />
+    <Resource
       name="reports"
       list={ReportList}
       show={ReportShow}
@@ -52,6 +60,9 @@ const App = () => (
     <Resource name="connections" />
     <Resource name="devices" />
     <Resource name="room_members" />
+    <Resource name="users_media" />
+    <Resource name="joined_rooms" />
+    <Resource name="pushers" />
     <Resource name="servernotices" />
   </Admin>
 );
