@@ -22,7 +22,7 @@ jobs:
           IMAGE="${GITHUB_REPOSITORY,,}"
           if [[ "$GITHUB_REF" == refs/heads/master ]]
           then
-            TAGS="$IMAGE:master"
+            TAGS="$IMAGE:latest"
           elif [[ "$GITHUB_REF" == refs/tags/* ]]
           then
             VERSION="${GITHUB_REF#refs/tags/}"
