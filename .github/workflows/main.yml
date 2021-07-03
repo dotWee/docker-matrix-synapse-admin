@@ -18,24 +18,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: prepare
-        id: prep
-        run: |
-          IMAGE="${GITHUB_REPOSITORY,,}"
-          if [[ "$GITHUB_REF" == refs/heads/master ]]
-          then
-            TAGS="$IMAGE:latest"
-          elif [[ "$GITHUB_REF" == refs/tags/* ]]
-          then
-            VERSION="${GITHUB_REF#refs/tags/}"
-            TAGS="$IMAGE:$VERSION"
-          else
-            TAGS="$IMAGE:continuous"
-          fi
-          echo "📚 building ref: $GITHUB_REF"
-          echo "🏷 image tags: $TAGS"
-          echo ::set-output name=tags::${TAGS}
-          
       - name: checkout code
         uses: actions/checkout@v2
 
@@ -53,22 +35,23 @@ jobs:
           username: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
           password: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
           
-      #- name: login to github container registry
-      #  if: secrets.GH_REGISTRY_USERNAME
-      #  uses: docker/login-action@v1 
-      #  with:
-      #    registry: ghcr.io
-      #    username: ${{ secrets.GH_REGISTRY_USERNAME }}
-      #    password: ${{ secrets.GH_REGISTRY_TOKEN }}
-          
+     # - name: login to github container registry
+     #   uses: docker/login-action@v1 
+     #   with:
+     #     registry: ghcr.io
+     #     username: ${{ secrets.GH_REGISTRY_USERNAME }}
+     #     password: ${{ secrets.GH_REGISTRY_TOKEN }}
+
+
       - name: build and push
         uses: docker/build-push-action@v2
         with:
           context: .
-          platforms: linux/amd64,linux/arm/v7,linux/arm64
+          platforms: linux/amd64,linux/arm64
           push: true
-          cache-from: type=registry,ref=${{ steps.prep.outputs.tags }}
-          cache-to: type=inline
+          # cache-from: type=registry,ref=${{ steps.prep.outputs.tags }}
+          # cache-to: type=inline
           build-args: NODE_OPTIONS=--max_old_space_size=1024
-          tags: docker.io/${{ steps.prep.outputs.tags }}
-          #     ghcr.io/${{ steps.prep.outputs.tags }}
+          tags: |
+            dotwee/synapse-admin:latest
+          #  ghcr.io/dotwee/synapse-admin:latest
