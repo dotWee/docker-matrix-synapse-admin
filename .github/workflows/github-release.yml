@@ -14,11 +14,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 24
-      - run: yarn install --immutable
-      - run: yarn build
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - run: bun run build
       - run: |
           version=`git describe --dirty --tags || echo unknown`
           cp -r dist synapse-admin-$version

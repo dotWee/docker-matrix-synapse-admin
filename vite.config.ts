@@ -2,22 +2,20 @@ import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
 export default defineConfig(({ mode }) => ({
-  plugins: [
-    react(),
-  ],
+  plugins: [react()],
   server: {
     host: true,
   },
-  base: './',
+  base: "./",
   build: {
     chunkSizeWarningLimit: 1500,
-    sourcemap: mode === 'development',
+    sourcemap: mode === "development",
   },
   test: {
     globals: true,
-    environment: 'happy-dom',
+    environment: "happy-dom",
     setupFiles: "./src/vitest.setup.ts",
-    exclude: ["e2e/**"],
+    exclude: ["e2e/**", "node_modules/**"],
     coverage: {
       include: ["src/**/*.{ts,tsx}"],
       exclude: ["src/**/*.test.{ts,tsx}", "src/vitest.setup.ts"],
@@ -25,6 +23,6 @@ export default defineConfig(({ mode }) => ({
     },
   },
   ssr: {
-    noExternal: ['react-dropzone', 'react-admin', 'ra-ui-materialui'],
+    noExternal: ["react-dropzone", "react-admin", "ra-ui-materialui"],
   },
 }));

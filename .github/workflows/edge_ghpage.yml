@@ -16,15 +16,13 @@ jobs:
         with:
           fetch-depth: 100
           fetch-tags: true
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 24
+      - uses: oven-sh/setup-bun@v2
       - name: Install, Test, and Build 🔧
         run: |
-          yarn install --immutable
-          yarn test --coverage
-          yarn build --base=/synapse-admin
-          yarn coverage:badge
+          bun install --frozen-lockfile
+          bun run test --coverage
+          bun run build --base=/synapse-admin
+          bun run coverage:badge
           mkdir -p dist/coverage
           cp -R coverage/. dist/coverage/
 

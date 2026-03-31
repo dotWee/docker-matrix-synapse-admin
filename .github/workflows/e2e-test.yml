@@ -18,29 +18,27 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Setup node
-        uses: actions/setup-node@v6
-        with:
-          node-version: 24
+      - name: Setup bun
+        uses: oven-sh/setup-bun@v2
 
       - name: Install dependencies
-        run: yarn --immutable
+        run: bun install --frozen-lockfile
 
       - name: Cache Playwright browsers
         id: playwright-cache
         uses: actions/cache@v5
         with:
           path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/bun.lock') }}
           restore-keys: |
             ${{ runner.os }}-playwright-
 
       - name: Install Playwright browser
         if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: yarn playwright install --with-deps chromium
+        run: bunx playwright install --with-deps chromium
 
       - name: Run Synapse end-to-end test
-        run: yarn test:e2e:ci
+        run: bun run test:e2e:ci
 
       - name: Collect docker logs on failure
         if: failure()

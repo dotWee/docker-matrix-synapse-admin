@@ -25,13 +25,13 @@ rm -rf "${SYNAPSE_DATA_DIR}"
 docker compose -f "${ROOT_DIR}/docker-compose.yml" --project-name synapse-admin-e2e up -d --build
 
 echo "Wait for ${SYNAPSE_ADMIN_BASE_URL}/config.json"
-node "${ROOT_DIR}/scripts/e2e/wait-for-url.mjs" "${SYNAPSE_ADMIN_BASE_URL}/config.json" 120000
+bun "${ROOT_DIR}/scripts/e2e/wait-for-url.mjs" "${SYNAPSE_ADMIN_BASE_URL}/config.json" 120000
 echo "Wait for ${SYNAPSE_BASE_URL}/_matrix/client/versions"
-node "${ROOT_DIR}/scripts/e2e/wait-for-url.mjs" "${SYNAPSE_BASE_URL}/_matrix/client/versions" 120000
+bun "${ROOT_DIR}/scripts/e2e/wait-for-url.mjs" "${SYNAPSE_BASE_URL}/_matrix/client/versions" 120000
 echo "Register admin account"
-node "${ROOT_DIR}/scripts/e2e/register-admin.mjs"
+bun "${ROOT_DIR}/scripts/e2e/register-admin.mjs"
 
 echo "Start playwright tests"
-yarn playwright test
+bunx playwright test
 
 E2E_RUN_STATUS=0

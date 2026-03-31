@@ -15,5 +15,5 @@ docker run --rm \
   -v "${ROOT_DIR}:/workspace" \
   -v "${SYNAPSE_DATA_DIR}:/data" \
   -w /workspace \
-  node:lts \
-  node ./scripts/e2e/configure-synapse.mjs /data/homeserver.yaml
+  oven/bun:latest \
+  bun ./scripts/e2e/configure-synapse.mjs /data/homeserver.yaml

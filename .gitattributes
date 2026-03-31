@@ -1,1 +1,2 @@
-yarn*.cjs binary
+# Bun lockfile is a text-based JSONC file
+bun.lock linguist-generated=true
