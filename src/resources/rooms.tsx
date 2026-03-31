@@ -38,6 +38,7 @@ import {
 } from "react-admin";
 
 import { DATE_FORMAT } from "../components/date";
+import { PurgeHistoryButton } from "../components/PurgeHistory";
 import {
   RoomDirectoryBulkPublishButton,
   RoomDirectoryBulkUnpublishButton,
@@ -67,6 +68,7 @@ const RoomShowActions = () => {
   return (
     <TopToolbar>
       {publishButton}
+      <PurgeHistoryButton />
       <DeleteButton
         mutationMode="pessimistic"
         confirmTitle="resources.rooms.action.erase.title"

@@ -192,6 +192,23 @@ interface SynapseTranslationMessages extends TranslationMessages {
           title: string;
           content: string;
         };
+        purge_history?: {
+          title: string;
+          helper: string;
+          action: string;
+          fields: {
+            purge_up_to_ts: string;
+            delete_local_events: string;
+          };
+          status: {
+            active: string;
+            complete: string;
+            failed: string;
+          };
+          started: string;
+          success: string;
+          failure: string;
+        };
       };
     };
     reports: {

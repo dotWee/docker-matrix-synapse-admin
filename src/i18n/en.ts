@@ -198,6 +198,24 @@ const en: SynapseTranslationMessages = {
           content:
             "Are you sure you want to delete the room? This cannot be undone. All messages and shared media in the room will be deleted from the server!",
         },
+        purge_history: {
+          title: "Purge history",
+          helper:
+            "Purge historic events from the room, reclaiming disk space. Events sent by local users are kept by default. Room state data (joins, leaves, topic) is always preserved. This may take several minutes for large rooms.",
+          action: "Purge",
+          fields: {
+            purge_up_to_ts: "Purge events before",
+            delete_local_events: "Also delete events sent by local users",
+          },
+          status: {
+            active: "Purge in progress...",
+            complete: "Purge completed successfully.",
+            failed: "Purge failed",
+          },
+          started: "Purge history job started.",
+          success: "Room history purged successfully.",
+          failure: "An error has occurred while purging history.",
+        },
       },
     },
     reports: {

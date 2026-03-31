@@ -1,12 +1,5 @@
 import { stringify } from "query-string";
-import {
-  DataProvider,
-  DeleteParams,
-  Identifier,
-  PaginationPayload,
-  RaRecord,
-  SortPayload,
-} from "react-admin";
+import { DataProvider, DeleteParams, Identifier, PaginationPayload, RaRecord, SortPayload } from "react-admin";
 
 import { buildUrl, fetchJsonFromAbsoluteUrl, requireStoredBaseUrl, requireStoredHomeServer } from "./synapse";
 
@@ -239,10 +232,30 @@ export interface DeleteMediaResult {
   total: number;
 }
 
+/** Parameters accepted by the purge history admin action. */
+export interface PurgeHistoryParams {
+  room_id: string;
+  purge_up_to_ts: number;
+  delete_local_events?: boolean;
+}
+
+/** Result payload returned by Synapse after initiating a purge history request. */
+export interface PurgeHistoryResult {
+  purge_id: string;
+}
+
+/** Status payload returned when polling a purge history job. */
+export interface PurgeHistoryStatus {
+  status: "active" | "complete" | "failed";
+  error?: string;
+}
+
 /** Synapse-specific extension points layered on top of the standard react-admin data provider. */
 export interface SynapseDataProvider extends DataProvider {
   createMany: (resource: string, params: { data: RaRecord; ids: Identifier[] }) => Promise<{ data: unknown[] }>;
   deleteMedia: (params: DeleteMediaParams) => Promise<DeleteMediaResult>;
+  purgeHistory: (params: PurgeHistoryParams) => Promise<PurgeHistoryResult>;
+  getPurgeStatus: (purgeId: string) => Promise<PurgeHistoryStatus>;
 }
 
 /** Convert Synapse MXC URIs into thumbnail URLs that the admin UI can render directly. */
@@ -634,7 +647,9 @@ export const buildReferenceUrl = (resourceName: string, id: Identifier, query?: 
 /** Fetch a single collection-backed record and normalize it through the resource mapper. */
 export const fetchResourceRecord = async (resourceName: string, id: Identifier) => {
   const config = getCollectionResource(resourceName);
-  const { json } = await fetchJsonFromAbsoluteUrl(buildUrl(requireStoredBaseUrl(), `${config.path}/${encodeURIComponent(id)}`));
+  const { json } = await fetchJsonFromAbsoluteUrl(
+    buildUrl(requireStoredBaseUrl(), `${config.path}/${encodeURIComponent(id)}`)
+  );
   return config.map(json);
 };
 
@@ -693,6 +708,35 @@ export const deleteMedia = async ({
 
   const { json } = await fetchJsonFromAbsoluteUrl(buildUrl(requireStoredBaseUrl(), endpoint), { method: "POST" });
   return json as DeleteMediaResult;
+};
+
+/** Initiate a purge history job for a given room up to a specific timestamp. */
+export const purgeHistory = async ({
+  room_id,
+  purge_up_to_ts,
+  delete_local_events = false,
+}: PurgeHistoryParams): Promise<PurgeHistoryResult> => {
+  const endpoint = `/_synapse/admin/v1/purge_history/${encodeURIComponent(room_id)}`;
+  const body: Record<string, unknown> = { purge_up_to_ts };
+
+  if (delete_local_events) {
+    body.delete_local_events = true;
+  }
+
+  const { json } = await fetchJsonFromAbsoluteUrl(buildUrl(requireStoredBaseUrl(), endpoint), {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+
+  return json as PurgeHistoryResult;
+};
+
+/** Poll the status of a running purge history job. */
+export const getPurgeStatus = async (purgeId: string): Promise<PurgeHistoryStatus> => {
+  const endpoint = `/_synapse/admin/v1/purge_history_status/${encodeURIComponent(purgeId)}`;
+  const { json } = await fetchJsonFromAbsoluteUrl(buildUrl(requireStoredBaseUrl(), endpoint));
+
+  return json as PurgeHistoryStatus;
 };
 
 /** Main react-admin data provider plus Synapse-specific helper methods. */
@@ -842,6 +886,8 @@ const dataProvider = {
   },
 
   deleteMedia,
+  purgeHistory,
+  getPurgeStatus,
 } as SynapseDataProvider;
 
 export default dataProvider;

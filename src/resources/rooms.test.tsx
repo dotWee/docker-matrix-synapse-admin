@@ -6,6 +6,7 @@ const {
   deleteButtonMock,
   exportButtonMock,
   functionFieldMock,
+  purgeHistoryButtonMock,
   referenceFieldMock,
   referenceManyFieldMock,
   roomDirectoryBulkPublishButtonMock,
@@ -22,7 +23,10 @@ const {
   dataTableColMock: vi.fn((props: any) => <span data-testid="data-table-col">{props.source ?? props.label}</span>),
   deleteButtonMock: vi.fn((props: any) => <div data-testid="delete-button">{props.confirmTitle}</div>),
   exportButtonMock: vi.fn(() => <span>export-button</span>),
-  functionFieldMock: vi.fn(({ render }: any) => <span data-testid="function-field">{render({ canonical_alias: "#room:example.com" })}</span>),
+  functionFieldMock: vi.fn(({ render }: any) => (
+    <span data-testid="function-field">{render({ canonical_alias: "#room:example.com" })}</span>
+  )),
+  purgeHistoryButtonMock: vi.fn(() => <span>purge-history-button</span>),
   referenceFieldMock: vi.fn(({ children }: any) => <div>{children}</div>),
   referenceManyFieldMock: vi.fn(({ children }: any) => <div>{children}</div>),
   roomDirectoryBulkPublishButtonMock: vi.fn(() => <span>bulk-publish</span>),
@@ -40,6 +44,10 @@ const {
   useCreatePathMock: vi.fn(({ resource, id, type }: any) => `/${resource}/${id}/${type}`),
   useRecordContextMock: vi.fn(),
   useThemeMock: vi.fn(),
+}));
+
+vi.mock("../components/PurgeHistory", () => ({
+  PurgeHistoryButton: purgeHistoryButtonMock,
 }));
 
 vi.mock("./room_directory", () => ({
@@ -154,6 +162,7 @@ describe("rooms resource", () => {
 
     expect(showMock).toHaveBeenCalled();
     expect(screen.getByText("unpublish-room")).toBeTruthy();
+    expect(screen.getByText("purge-history-button")).toBeTruthy();
     expect(screen.getByTestId("delete-button").textContent).toContain("resources.rooms.action.erase.title");
     expect(screen.getByText("resources.rooms.name Lobby")).toBeTruthy();
     expect(referenceManyFieldMock).toHaveBeenCalledWith(
@@ -172,15 +181,16 @@ describe("rooms resource", () => {
     render(<RoomShow />);
 
     expect(screen.getByText("publish-room")).toBeTruthy();
+    expect(screen.getByText("purge-history-button")).toBeTruthy();
     expect(screen.getByText("resources.rooms.name !room:example.com")).toBeTruthy();
     expect(screen.getAllByTestId("data-table")[0].getAttribute("data-row-click")).toBe("/users/!room:example.com/edit");
   });
 
   it("uses the best available room label for record representation", () => {
     expect(resource.recordRepresentation?.({ name: "Lobby", id: "!room:example.com" } as never)).toBe("Lobby");
-    expect(resource.recordRepresentation?.({ canonical_alias: "#room:example.com", id: "!room:example.com" } as never)).toBe(
-      "#room:example.com"
-    );
+    expect(
+      resource.recordRepresentation?.({ canonical_alias: "#room:example.com", id: "!room:example.com" } as never)
+    ).toBe("#room:example.com");
     expect(resource.recordRepresentation?.({ id: "!room:example.com" } as never)).toBe("!room:example.com");
   });
 });
